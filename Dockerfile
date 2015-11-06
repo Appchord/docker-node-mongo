@@ -1,4 +1,4 @@
-FROM node:4.1.0-slim
+FROM node:4.2.2-slim
 
 RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
 
