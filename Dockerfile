@@ -35,6 +35,4 @@ RUN set -x \
 
 RUN mkdir -p /data/db && chown -R mongodb:mongodb /data/db
 
-VOLUME /data/db
-
 ENTRYPOINT ["node"]
