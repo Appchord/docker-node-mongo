@@ -1,4 +1,4 @@
-FROM node:4.2.2-slim
+FROM node:6.2.0-slim
 
 RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
 
@@ -18,8 +18,8 @@ RUN curl -o /usr/local/bin/gosu -SL "https://github.com/tianon/gosu/releases/dow
 # gpg: key 7F0CEB10: public key "Richard Kreuter <richard@10gen.com>" imported
 RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 492EAFE8CD016A07919F1D2B9ECBEC467F0CEB10
 
-ENV MONGO_MAJOR 3.0
-ENV MONGO_VERSION 3.0.6
+ENV MONGO_MAJOR 3.2
+ENV MONGO_VERSION 3.2.6
 
 RUN echo "deb http://repo.mongodb.org/apt/debian wheezy/mongodb-org/$MONGO_MAJOR main" > /etc/apt/sources.list.d/mongodb-org.list
 
