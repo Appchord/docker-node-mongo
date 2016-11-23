@@ -2,7 +2,7 @@ FROM node:7.2.0-slim
 
 RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
 
-RUN buildDeps="git numactl python" \
+RUN buildDeps="git numactl python build-essential" \
   && set -x \
   && apt-get update && apt-get install -y $buildDeps --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
