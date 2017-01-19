@@ -1,38 +1,43 @@
-FROM node:4.2.2-slim
+FROM alpine:edge
 
-RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
+ENV NPM_CONFIG_LOGLEVEL info
+ENV NODE_VERSION 7.4.0
 
-RUN buildDeps="git numactl" \
-  && set -x \
-  && apt-get update && apt-get install -y $buildDeps --no-install-recommends \
-  && rm -rf /var/lib/apt/lists/*
+RUN adduser -D -u 1000 node \
+    && apk add --no-cache \
+    bash git python make \
+        libstdc++ \
+    && apk add --no-cache --virtual .build-deps \
+        binutils-gold \
+        curl \
+        g++ \
+        gcc \
+        gnupg \
+        libgcc \
+        linux-headers \
+        make \
+        python \
+    && curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION.tar.xz" \
+    && curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
+    && tar -xf "node-v$NODE_VERSION.tar.xz" \
+    && cd "node-v$NODE_VERSION" \
+    && ./configure \
+    && make -j$(getconf _NPROCESSORS_ONLN) \
+    && make install \
+    && apk del .build-deps \
+    && cd .. \
+    && rm -Rf "node-v$NODE_VERSION" \
+    && rm "node-v$NODE_VERSION.tar.xz" SHASUMS256.txt.asc \
+    && echo http://dl-4.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories \
+    && apk add --no-cache mongodb \
+    && rm /usr/bin/mongosniff /usr/bin/mongoperf \
+    && apk add --no-cache g++ \
+    && mkdir -p /data/db \
+    && chown -R mongodb:mongodb /data/db \
+    && chown -R mongodb /data/db
 
-# grab gosu for easy step-down from root
-RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4
-RUN curl -o /usr/local/bin/gosu -SL "https://github.com/tianon/gosu/releases/download/1.2/gosu-$(dpkg --print-architecture)" \
-	&& curl -o /usr/local/bin/gosu.asc -SL "https://github.com/tianon/gosu/releases/download/1.2/gosu-$(dpkg --print-architecture).asc" \
-	&& gpg --verify /usr/local/bin/gosu.asc \
-	&& rm /usr/local/bin/gosu.asc \
-	&& chmod +x /usr/local/bin/gosu
+RUN npm install -g yarn
+RUN yarn global add node-gyp gulp
 
-# gpg: key 7F0CEB10: public key "Richard Kreuter <richard@10gen.com>" imported
-RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 492EAFE8CD016A07919F1D2B9ECBEC467F0CEB10
+ENTRYPOINT [ "node" ]
 
-ENV MONGO_MAJOR 3.0
-ENV MONGO_VERSION 3.0.6
-
-RUN echo "deb http://repo.mongodb.org/apt/debian wheezy/mongodb-org/$MONGO_MAJOR main" > /etc/apt/sources.list.d/mongodb-org.list
-
-RUN set -x \
-	&& apt-get update \
-	&& apt-get install -y \
-		mongodb-org=$MONGO_VERSION \
-		mongodb-org-server=$MONGO_VERSION \
-		mongodb-org-shell=$MONGO_VERSION \
-		mongodb-org-mongos=$MONGO_VERSION \
-		mongodb-org-tools=$MONGO_VERSION \
-	&& rm -rf /var/lib/apt/lists/*
-
-RUN mkdir -p /data/db && chown -R mongodb:mongodb /data/db
-
-ENTRYPOINT ["node"]
