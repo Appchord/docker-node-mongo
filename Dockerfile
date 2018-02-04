@@ -1,7 +1,7 @@
 FROM alpine:edge
 
 ENV NPM_CONFIG_LOGLEVEL info
-ENV NODE_VERSION=8.1.2 YARN_VERSION=latest
+ENV NODE_VERSION=9.5.0 YARN_VERSION=latest
 ENV CONFIG_FLAGS="--fully-static"
 # --without-npm
 
