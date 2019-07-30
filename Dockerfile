@@ -1,10 +1,10 @@
-FROM node:11.1.0-alpine
+FROM node:12.7.0-alpine
 
 # --without-npm
 
-RUN echo http://dl-4.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories \
+RUN echo http://dl-4.alpinelinux.org/alpine/v3.9/community >> /etc/apk/repositories \
     && apk add --no-cache mongodb git\
-    && rm /usr/bin/mongoperf \
+    && rm -f /usr/bin/mongoperf \
     && apk add --no-cache g++ \
     && mkdir -p /data/db \
     && chown -R mongodb:mongodb /data/db \
